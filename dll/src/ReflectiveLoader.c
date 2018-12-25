@@ -608,47 +608,12 @@ DLLEXPORT ULONG_PTR WINAPI ReflectiveLoader(VOID)
 //===============================================================================================//
 #ifndef REFLECTIVEDLLINJECTION_CUSTOM_DLLMAIN
 
-// you must implement this function...
-extern DWORD DLLEXPORT Init(SOCKET socket);
-
-BOOL MetasploitDllAttach(SOCKET socket)
-{
-	Init(socket);
-	return TRUE;
-}
-
-BOOL MetasploitDllDetach(DWORD dwExitFunc)
-{
-	switch (dwExitFunc)
-	{
-	case EXITFUNC_SEH:
-		SetUnhandledExceptionFilter(NULL);
-		break;
-	case EXITFUNC_THREAD:
-		ExitThread(0);
-		break;
-	case EXITFUNC_PROCESS:
-		ExitProcess(0);
-		break;
-	default:
-		break;
-	}
-
-	return TRUE;
-}
-
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpReserved)
 {
 	BOOL bReturnValue = TRUE;
 
 	switch (dwReason)
 	{
-	case DLL_METASPLOIT_ATTACH:
-		bReturnValue = MetasploitDllAttach((SOCKET)lpReserved);
-		break;
-	case DLL_METASPLOIT_DETACH:
-		bReturnValue = MetasploitDllDetach((DWORD)((DWORD_PTR)lpReserved & 0xFFFFFFFF));
-		break;
 	case DLL_QUERY_HMODULE:
 		if (lpReserved != NULL)
 			*(HMODULE *)lpReserved = hAppInstance;
